@@ -1,0 +1,440 @@
+{
+	"name": "pl-movie-recommend",
+	"properties": {
+		"activities": [
+			{
+				"name": "Get files metadata",
+				"type": "GetMetadata",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "readFiles",
+						"type": "DatasetReference"
+					},
+					"fieldList": [
+						"childItems"
+					],
+					"storeSettings": {
+						"type": "AzureBlobStorageReadSettings",
+						"recursive": true,
+						"enablePartitionDiscovery": false
+					},
+					"formatSettings": {
+						"type": "DelimitedTextReadSettings"
+					}
+				}
+			},
+			{
+				"name": "for each file",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Get files metadata",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Get files metadata').output.childItems",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "File",
+							"type": "GetMetadata",
+							"dependsOn": [
+								{
+									"activity": "fname",
+									"dependencyConditions": [
+										"Completed"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"dataset": {
+									"referenceName": "lz_dataset",
+									"type": "DatasetReference",
+									"parameters": {
+										"filename": {
+											"value": "@variables('fname')",
+											"type": "Expression"
+										}
+									}
+								},
+								"fieldList": [
+									"structure"
+								],
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							}
+						},
+						{
+							"name": "Schema",
+							"type": "GetMetadata",
+							"dependsOn": [
+								{
+									"activity": "fname",
+									"dependencyConditions": [
+										"Completed"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"dataset": {
+									"referenceName": "schema_dataset",
+									"type": "DatasetReference",
+									"parameters": {
+										"filename": {
+											"value": "@replace(variables('fname'),'.csv','chema.csv')",
+											"type": "Expression"
+										}
+									}
+								},
+								"fieldList": [
+									"structure"
+								],
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							}
+						},
+						{
+							"name": "If schema matches",
+							"type": "IfCondition",
+							"dependsOn": [
+								{
+									"activity": "File",
+									"dependencyConditions": [
+										"Completed"
+									]
+								},
+								{
+									"activity": "Schema",
+									"dependencyConditions": [
+										"Completed"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"expression": {
+									"value": "@and(\n    or(equals(variables('fname'),'movies.csv'),equals(variables('fname'),'ratings.csv'))\n    ,equals(activity('File').output.structure,activity('Schema').output.structure)\n)\n",
+									"type": "Expression"
+								},
+								"ifFalseActivities": [
+									{
+										"name": "cp failed data",
+										"type": "Copy",
+										"dependsOn": [],
+										"policy": {
+											"timeout": "0.12:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"source": {
+												"type": "DelimitedTextSource",
+												"storeSettings": {
+													"type": "AzureBlobStorageReadSettings",
+													"recursive": true,
+													"enablePartitionDiscovery": false
+												},
+												"formatSettings": {
+													"type": "DelimitedTextReadSettings"
+												}
+											},
+											"sink": {
+												"type": "DelimitedTextSink",
+												"storeSettings": {
+													"type": "AzureBlobStorageWriteSettings"
+												},
+												"formatSettings": {
+													"type": "DelimitedTextWriteSettings",
+													"quoteAllText": true,
+													"fileExtension": ".csv"
+												}
+											},
+											"enableStaging": false,
+											"translator": {
+												"type": "TabularTranslator",
+												"typeConversion": true,
+												"typeConversionSettings": {
+													"allowDataTruncation": true,
+													"treatBooleanAsNumber": false
+												}
+											}
+										},
+										"inputs": [
+											{
+												"referenceName": "lz_dataset",
+												"type": "DatasetReference",
+												"parameters": {
+													"filename": {
+														"value": "@variables('fname')",
+														"type": "Expression"
+													}
+												}
+											}
+										],
+										"outputs": [
+											{
+												"referenceName": "dataset_reject_data",
+												"type": "DatasetReference",
+												"parameters": {
+													"filename": {
+														"value": "@variables('fname')",
+														"type": "Expression"
+													}
+												}
+											}
+										]
+									},
+									{
+										"name": "Fail Mail",
+										"type": "WebActivity",
+										"dependsOn": [
+											{
+												"activity": "cp failed data",
+												"dependencyConditions": [
+													"Completed"
+												]
+											}
+										],
+										"policy": {
+											"timeout": "0.12:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [
+											{
+												"name": "pipelineName",
+												"value": "@{pipeline().Pipeline}"
+											}
+										],
+										"typeProperties": {
+											"url": "https://prod-43.southeastasia.logic.azure.com:443/workflows/d8b53534e57c4c66beaa0335bb6c971d/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=uwgfWXqQ8lkuwtCuX-pUX_Kqmy_DCsmt17geVRUnCvE",
+											"method": "POST",
+											"body": {
+												"value": "{\n    \"DataFactoryName\":\"@{pipeline().DataFactory}\",\n    \"Subject\":\"An error has been occured\",\n    \"ErrorMessage\":\"Invalid schema.\",\n    \"EmailTo\":\"sbirender51@gmail.com\"\n}",
+												"type": "Expression"
+											}
+										}
+									}
+								],
+								"ifTrueActivities": [
+									{
+										"name": "cp validate movie data",
+										"description": "copy data after validation",
+										"type": "Copy",
+										"dependsOn": [],
+										"policy": {
+											"timeout": "0.12:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"source": {
+												"type": "DelimitedTextSource",
+												"storeSettings": {
+													"type": "AzureBlobStorageReadSettings",
+													"recursive": true,
+													"enablePartitionDiscovery": false
+												},
+												"formatSettings": {
+													"type": "DelimitedTextReadSettings"
+												}
+											},
+											"sink": {
+												"type": "DelimitedTextSink",
+												"storeSettings": {
+													"type": "AzureBlobStorageWriteSettings"
+												},
+												"formatSettings": {
+													"type": "DelimitedTextWriteSettings",
+													"quoteAllText": true,
+													"fileExtension": ".csv"
+												}
+											},
+											"enableStaging": false,
+											"translator": {
+												"type": "TabularTranslator",
+												"typeConversion": true,
+												"typeConversionSettings": {
+													"allowDataTruncation": true,
+													"treatBooleanAsNumber": false
+												}
+											}
+										},
+										"inputs": [
+											{
+												"referenceName": "lz_dataset",
+												"type": "DatasetReference",
+												"parameters": {
+													"filename": {
+														"value": "@variables('fname')",
+														"type": "Expression"
+													}
+												}
+											}
+										],
+										"outputs": [
+											{
+												"referenceName": "dataset_valid_movie",
+												"type": "DatasetReference",
+												"parameters": {
+													"filename": {
+														"value": "@variables('fname')",
+														"type": "Expression"
+													}
+												}
+											}
+										]
+									},
+									{
+										"name": "MovieML",
+										"type": "DatabricksNotebook",
+										"dependsOn": [
+											{
+												"activity": "cp validate movie data",
+												"dependencyConditions": [
+													"Succeeded"
+												]
+											}
+										],
+										"policy": {
+											"timeout": "0.12:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"notebookPath": "/Users/sbirender51@gmail.com/nb-movie_recommend",
+											"baseParameters": {
+												"Input": {
+													"value": "@pipeline().parameters.UserForRec",
+													"type": "Expression"
+												}
+											}
+										},
+										"linkedServiceName": {
+											"referenceName": "ls_movie_notebook",
+											"type": "LinkedServiceReference"
+										}
+									},
+									{
+										"name": "Success Mail",
+										"type": "WebActivity",
+										"dependsOn": [
+											{
+												"activity": "MovieML",
+												"dependencyConditions": [
+													"Completed"
+												]
+											}
+										],
+										"policy": {
+											"timeout": "0.12:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [
+											{
+												"name": "Body",
+												"value": "{     \"Subject\":\"Moive recommended for you\",     \"Movies\":\"replace(@{activity('MovieML').output.runOutput},'\"','''')\",     \"EmailTo\":\"sbirender51gmail.com\" }"
+											}
+										],
+										"typeProperties": {
+											"url": "https://prod-43.southeastasia.logic.azure.com:443/workflows/d8b53534e57c4c66beaa0335bb6c971d/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=uwgfWXqQ8lkuwtCuX-pUX_Kqmy_DCsmt17geVRUnCvE",
+											"method": "POST",
+											"body": {
+												"value": "{\n    \"Subject\":\"Moive recommended for you\",\n    \"Movies\":@{activity('MovieML').output.runOutput},\n    \"EmailTo\":\"sbirender51@gmail.com\"\n}",
+												"type": "Expression"
+											}
+										}
+									}
+								]
+							}
+						},
+						{
+							"name": "fname",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "fname",
+								"value": {
+									"value": "@item().name",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"UserForRec": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"fname": {
+				"type": "String"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2023-03-09T16:18:06Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}
