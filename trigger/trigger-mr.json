@@ -1,0 +1,25 @@
+{
+	"name": "trigger-mr",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "pl-movie-recommend",
+					"type": "PipelineReference"
+				}
+			}
+		],
+		"type": "BlobEventsTrigger",
+		"typeProperties": {
+			"blobPathBeginsWith": "/rawdata/blobs/Movie",
+			"blobPathEndsWith": ".csv",
+			"ignoreEmptyBlobs": true,
+			"scope": "/subscriptions/9a1be070-51c7-4856-9b97-326a714b21a9/resourceGroups/movie-recommendation-rg/providers/Microsoft.Storage/storageAccounts/sa2mrlandingzone",
+			"events": [
+				"Microsoft.Storage.BlobCreated"
+			]
+		}
+	}
+}
