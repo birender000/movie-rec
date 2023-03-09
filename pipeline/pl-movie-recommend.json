@@ -259,7 +259,7 @@
 											"url": "https://prod-43.southeastasia.logic.azure.com:443/workflows/d8b53534e57c4c66beaa0335bb6c971d/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=uwgfWXqQ8lkuwtCuX-pUX_Kqmy_DCsmt17geVRUnCvE",
 											"method": "POST",
 											"body": {
-												"value": "{\n    \"DataFactoryName\":\"@{pipeline().DataFactory}\",\n    \"Pipeline\":\"@{pipeline().Pipeline}\",\n    \"Subject\":\"An error has been occured\",\n    \"ErrorMessage\":\"Invalid schema.\",\n    \"EmailTo\":\"sbirender51@gmail.com\"\n}",
+												"value": "{\n    \"DataFactoryName\":\"@{pipeline().DataFactory}\",\n    \"Subject\":\"An error has been occured\",\n    \"ErrorMessage\":\"Invalid schema.\",\n    \"EmailTo\":\"sbirender51@gmail.com\"\n}",
 												"type": "Expression"
 											}
 										}
