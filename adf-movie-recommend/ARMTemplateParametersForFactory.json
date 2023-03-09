@@ -1,0 +1,21 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "adf-movie-recommend"
+		},
+		"ls_movie_data_store_connectionString": {
+			"value": ""
+		},
+		"ls_movie_notebook_accessToken": {
+			"value": ""
+		},
+		"ls_movie_notebook_properties_typeProperties_existingClusterId": {
+			"value": "0216-162225-kie8e6fi"
+		},
+		"trigger-mr_properties_typeProperties_scope": {
+			"value": "/subscriptions/9a1be070-51c7-4856-9b97-326a714b21a9/resourceGroups/movie-recommendation-rg/providers/Microsoft.Storage/storageAccounts/sa2mrlandingzone"
+		}
+	}
+}
