@@ -26,12 +26,12 @@ Architecture
 Different use cases cover.
 ===========================
 
-File name validation
-Schema validation
-data cleaning
-data transformation
-model training and testing
-mail integration.
+1. File name validation
+2. Schema validation
+3. Data cleaning
+4. Data transformation
+5. Model training and testing
+6. Mail integration.
 
-    
+
 --Birender Singh
