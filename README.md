@@ -11,13 +11,16 @@ Service used:
 
 Architecture
 ================
-
-                                                                                                                                                                                                          |---------------------| ====> copy data with wrong filename ====> send failure mail.                     
-blob  ====> get metadata and =====>|schema validation and|           and schema to blob[reject]
-[raw data]  check for              |filename validation  |         
-            all files received     |---------------------| ====> copy data with correct ===> mount notebook and  ====> link databricks ===> send mail with 
-                                                                  filename and schema        do requrired  with         access token key     recommended movie
-                                                                  to blob[validate]           transformation                                                                                                                             and model training
+                                               
+1. blob [raw data] 
+2. get metadata and check for all files received
+3. schema validation and filename validation
+4. copy data with wrong filename and schema to blob[reject] and send failure mail.                 
+5. copy data with correct filename and schema to blob[validate]  
+6. mount notebook and do requrired transformation and model training. 
+7. link databricks with access token key 
+8. send mail with recommended movies.
+                                                                                                                                                                                                        
 
 
 Different use cases cover.
