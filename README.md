@@ -7,6 +7,7 @@ Service used:
 2. Databricks (transformation)
 3. Key vault (secrets)
 4. blob storage (raw data storage)
+5. logic app (mail integration)
 
 
 Architecture
