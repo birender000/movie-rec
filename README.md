@@ -23,15 +23,19 @@ Architecture
                                                                                                                                                                                                         
 
 
-Different use cases cover.
+Leanings
 ===========================
 
 1. File name validation
 2. Schema validation
-3. Data cleaning
-4. Data transformation
-5. Model training and testing
-6. Mail integration.
+3. App registration
+4. Creation of secrets keys in key vault
+5. Databricks scope creation and link to key vault
+6. Data cleaning
+7. Data transformation and analysis
+8. Model training and testing
+9. Data bricks accesss in ADF using acess token key
+10. Mail integration.
 
 
 --Birender Singh
