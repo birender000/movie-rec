@@ -37,6 +37,7 @@ Leanings
 9. Model training and testing
 10. Data bricks accesss in ADF using acess token key
 11. Mail integration.
+12. Integration with github and azure devops.
 
 
 --Birender Singh
