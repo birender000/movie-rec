@@ -30,12 +30,13 @@ Leanings
 2. Schema validation
 3. App registration
 4. Creation of secrets keys in key vault
-5. Databricks scope creation and link to key vault
-6. Data cleaning
-7. Data transformation and analysis
-8. Model training and testing
-9. Data bricks accesss in ADF using acess token key
-10. Mail integration.
+5. Storage mount in Databricks
+6. Databricks scope creation and link to key vault
+7. Data cleaning
+8. Data transformation and analysis
+9. Model training and testing
+10. Data bricks accesss in ADF using acess token key
+11. Mail integration.
 
 
 --Birender Singh
